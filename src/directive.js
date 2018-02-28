@@ -53,29 +53,59 @@
  * <div translate translate-params-cost="cost | currency">This product: {{product}} costs {{cost}}.</div>
  * ```
  */
-angular.module('gettext').directive('translate', function (gettextCatalog, $parse, $animate, $compile, $window, gettextUtil) {
+angular.module('gettext').directive('translate', function (gettextCatalog, $parse, $animate, $compile, $interpolate, $window, gettextUtil) {
     var msie = parseInt((/msie (\d+)/i.exec($window.navigator.userAgent) || [])[1], 10);
     var PARAMS_PREFIX = 'translateParams';
+    var PARAMS_HTML_PREFIX = 'translateHtmlParams';
+    /**
+     * A list of variables that allow the use of HTML
+     * @type {Array}
+     */
+    var allowedHtmlScopeVariables = [];
 
     function getCtxAttr(key) {
         return gettextUtil.lcFirst(key.replace(PARAMS_PREFIX, ''));
     }
 
+    function getCtxHtmlAttr(key) {
+        return gettextUtil.lcFirst(key.replace(PARAMS_HTML_PREFIX, ''));
+    }
+
     function handleInterpolationContext(scope, attrs, update) {
+        // get normal attributes (translate-params-*)
         var attributes = Object.keys(attrs).filter(function (key) {
             return gettextUtil.startsWith(key, PARAMS_PREFIX) && key !== PARAMS_PREFIX;
         });
 
-        if (!attributes.length) {
+        // get html attributes (translate-html-params-*)
+        var htmlAttributes = Object.keys(attrs).filter(function (key) {
+            return gettextUtil.startsWith(key, PARAMS_HTML_PREFIX) && key !== PARAMS_HTML_PREFIX;
+        });
+
+        // reset allowedHtmlScopeVariables
+        allowedHtmlScopeVariables = [];
+
+        if (!attributes.length && !htmlAttributes.length) {
             return null;
         }
 
         var interpolationContext = scope.$new();
         var unwatchers = [];
+        // handle normal scope attributes
         attributes.forEach(function (attribute) {
             var unwatch = scope.$watch(attrs[attribute], function (newVal) {
                 var key = getCtxAttr(attribute);
                 interpolationContext[key] = newVal;
+                update(interpolationContext);
+            });
+            unwatchers.push(unwatch);
+        });
+        // handle html attributes
+        htmlAttributes.forEach(function (attribute) {
+            var unwatch = scope.$watch(attrs[attribute], function (newVal) {
+                var key = getCtxHtmlAttr(attribute);
+                interpolationContext[key] = newVal;
+                allowedHtmlScopeVariables.push(key);
                 update(interpolationContext);
             });
             unwatchers.push(unwatch);
@@ -142,6 +172,17 @@ angular.module('gettext').directive('translate', function (gettextCatalog, $pars
                             }
                             return;
                         }
+
+                        // add a way to handle ng-bind-html with a regex looking for %(variable)s or %(variable)x
+                        var regex = new RegExp(/\{\{\s*(.*?)?\s*\}\}/g);
+
+                        translated = translated.replace(regex, function replacer(match, p1) {
+                            if (allowedHtmlScopeVariables.indexOf(p1) >= 0) {
+                                return $interpolate('{{ ' + p1 +  ' }}')(interpolationContext);
+                            }
+
+                            return match;
+                        });
 
                         // Swap in the translation
                         var newWrapper = angular.element('<span>' + translated + '</span>');
