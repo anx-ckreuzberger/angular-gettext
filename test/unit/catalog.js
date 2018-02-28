@@ -101,20 +101,20 @@ describe("Catalog", function () {
         assert.equal(catalog.getPlural(2, "Bird", "Birds"), "[MISSING]: Birds");
     });
 
-    it("Can return an interpolated string", function () {
+    it("Can not interpolate strings", function () {
         var strings = { "Hello {{name}}!": "Hallo {{name}}!" };
         assert.deepEqual(catalog.strings, {});
         catalog.setCurrentLanguage("nl");
         catalog.setStrings("nl", strings);
-        assert.equal(catalog.getString("Hello {{name}}!", { name: "Andrew" }), "Hallo Andrew!");
+        assert.equal(catalog.getString("Hello {{name}}!", { name: "Andrew" }), "Hallo {{name}}!");
     });
 
-    it("Can return a pure interpolated string", function () {
+    it("Can not interpolate a pure string", function () {
         var strings = { "{{name}}": "{{name}}" };
         assert.deepEqual(catalog.strings, {});
         catalog.setCurrentLanguage("nl");
         catalog.setStrings("nl", strings);
-        assert.equal(catalog.getString("{{name}}", { name: "Andrew" }), "Andrew");
+        assert.equal(catalog.getString("{{name}}", { name: "Andrew" }), "{{name}}");
     });
 
     it("Can return an interpolated plural string", function () {

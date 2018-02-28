@@ -245,7 +245,6 @@ angular.module('gettext').factory('gettextCatalog', function (gettextPlurals, ge
             string = this.getStringFormFor(this.currentLanguage, string, 1, context) ||
                      this.getStringFormFor(fallbackLanguage, string, 1, context) ||
                      prefixDebug(string);
-            string = scope ? $interpolate(string)(scope) : string;
             return addTranslatedMarkers(string);
         },
 
