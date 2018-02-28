@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <title>Click Test HTML Params</title>
+    <script src="/bower_components/angular/angular.js"></script>
+    <script src="/dist/angular-gettext.js"></script>
+    <script>
+        angular.module('myApp', ['gettext']);
+
+        angular.module('myApp').directive('myDirective', function () {
+            return {
+                'restrict': 'EA',
+                'scope': {
+                    'first': '=',
+                    'second': '='
+                },
+                'template': "{{ first }} + {{ second }} = {{ first + second }}",
+                'controller': function ($scope) {
+                }
+            };
+        });
+
+        angular.module('myApp').run(function ($rootScope, $sce) {
+            $rootScope.one = 1;
+            $rootScope.two = 2;
+
+            $rootScope.htmlString = $sce.trustAsHtml('<b>bold</b><my-directive first="one" second="two"></my-directive>');
+
+            $rootScope.click = function () {
+                $rootScope.one += 1;
+            }
+
+        });
+    </script>
+</head>
+<body>
+    <div>
+        <h3>Direct Execution of directive</h3>
+
+        <my-directive first="one" second="two"></my-directive>
+    </div>
+
+    <div>
+        <h3>Plain AngularJS Interpolation</h3>
+        {{ htmlString }}
+    </div>
+
+    <div>
+        <h3>AngularJS with bind-html</h3>
+        <div ng-bind-html="htmlString"></div>
+    </div>
+    <div>
+        <h3>AngularJS Interpolation with translate</h3>
+        <div translate>Some Text {{ htmlString }}</div>
+    </div>
+    <div>
+        <h3>AngularJS Interpolation with translate and translate-html-params</h3>
+        <div translate translate-html-params-html-string="htmlString">
+            Some Text {{ htmlString }}
+        </div>
+    </div>
+    <button ng-click="click()">clickme</button>
+</body>
+</html>
+
