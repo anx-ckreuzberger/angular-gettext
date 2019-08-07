@@ -2,10 +2,49 @@
 
 > Translate your Angular.JS applications with gettext.
 
-[![Build Status](https://travis-ci.org/rubenv/angular-gettext.png?branch=master)](https://travis-ci.org/rubenv/angular-gettext)
+Please note, this is a fork of [rubenv/angular-gettext](https://github.com/rubenv/angular-gettext) with a simple extension called "html params".
+
+[![Build Status](https://travis-ci.org/anx-ckreuzberger/angular-gettext.png?branch=master)](https://travis-ci.org/anx-ckreuzberger/angular-gettext)
 
 Check the website for usage instructions: [http://angular-gettext.rocketeer.be/](http://angular-gettext.rocketeer.be/).
     
+## HTML Params
+
+Assume you have a controller with the following content:
+```javascript
+function($scope) {
+    $scope.foo = "<b>BAR</b>";
+}
+```
+
+If you write the following in your template:
+```html
+<div translate>Hello {{ foo }}</div>
+```
+the HTML will not be shown, you'll end up with the following output:
+```html
+<div translate>Hello &lt;b&gt;BAR&lt;/b&gt;
+```
+
+If, however, you explicitly want to show the HTML content, this extension of the angular-gettext library provides you a directive for it, which works as follows:
+
+```html
+<div translate translate-html-params-fancy-user-name="foo">
+    Hello {{ fancyUserName }}
+</div>
+```
+
+## Usage
+
+If you want to use this library, you can add it via npm or package.json by adding `git+https://github.com/anx-ckreuzberger/angular-gettext.git#v2.4.1-htmlparams`, e.g.:
+
+```bash
+npm install https://github.com/anx-ckreuzberger/angular-gettext.git#v2.4.1-htmlparams
+# or
+yarn add https://github.com/anx-ckreuzberger/angular-gettext.git#v2.4.1-htmlparams
+```
+
+
 ## License 
 
     (The MIT License)
@@ -29,3 +68,4 @@ Check the website for usage instructions: [http://angular-gettext.rocketeer.be/]
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
+
